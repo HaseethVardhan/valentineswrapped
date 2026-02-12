@@ -1,4 +1,4 @@
-import React from "react"
+
 import type { Page, Wrapped, ScrapbookPage, CouponPage, SummaryPage } from "../../types"
 
 interface PagesSidebarProps {

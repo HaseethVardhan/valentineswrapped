@@ -25,7 +25,7 @@ export const storage = {
                 throw new Error(`Failed to upload to R2: ${response.status} ${errorText}`)
             }
 
-            const data = await response.json()
+            // const data = await response.json() // Unused
 
             // Return Public URL
             const publicDomain = import.meta.env.VITE_R2_PUBLIC_DOMAIN

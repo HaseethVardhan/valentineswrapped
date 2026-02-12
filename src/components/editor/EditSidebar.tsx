@@ -1,4 +1,4 @@
-import React from "react"
+
 import type { Page, ScrapbookPage, CouponPage, SummaryPage, ScrapbookBlock, Coupon } from "../../types"
 import { processImage } from "../../lib/imageCompression"
 import { useEditorStore } from "../../lib/store"
