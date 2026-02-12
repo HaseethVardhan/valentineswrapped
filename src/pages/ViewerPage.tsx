@@ -34,11 +34,8 @@ export function ViewerPage() {
     const [showIntro, setShowIntro] = useState(false)
 
     // Video State
-    const [isPlaying, setIsPlaying] = useState(false)
-    const [isMuted, setIsMuted] = useState(false)
     const [videoPlayer, setVideoPlayer] = useState<any>(null)
     const userInteracted = useRef(false) // Tracks if user has explicitly started playback
-    const userPaused = useRef(false) // Tracks if user has explicitly paused
 
     // Get potential local draft
     const localWrapped = useEditorStore(state => state.wrapped)
@@ -80,14 +77,16 @@ export function ViewerPage() {
                     events: {
                         'onReady': (event: any) => {
                             setVideoPlayer(event.target)
-                            event.target.setVolume(50) // Set reasonable starting volume
+                            event.target.setVolume(50)
+                            // Start playing muted immediately to preload/buffer the audio
+                            // This way it's instant when the user taps to start
+                            event.target.mute()
+                            event.target.playVideo()
                         },
                         'onStateChange': (event: any) => {
-                            // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
-                            if (event.data === 1) {
-                                setIsPlaying(true)
-                            } else if (event.data === 2 || event.data === 0) {
-                                setIsPlaying(false)
+                            // If ended (0), restart playback for continuous loop
+                            if (event.data === 0) {
+                                event.target.playVideo()
                             }
                         },
                         'onError': (e: any) => console.error("YouTube Player Error:", e)
@@ -161,7 +160,6 @@ export function ViewerPage() {
         if (!userInteracted.current) return // Only keep-alive after user has explicitly started playback
 
         const checkAndPlay = () => {
-            if (userPaused.current) return // Don't override user's explicit pause
             try {
                 const state = videoPlayer.getPlayerState()
                 // If it's paused (2), ended (0), cued (5), or unstarted (-1)
@@ -199,37 +197,13 @@ export function ViewerPage() {
         }
     }, [started, videoPlayer])
 
-    // Toggle Play/Pause
-    const togglePlay = () => {
-        if (!videoPlayer) return
-        if (isPlaying) {
-            userPaused.current = true // Signal keep-alive to stop resuming
-            videoPlayer.pauseVideo()
-        } else {
-            userPaused.current = false // Allow keep-alive to resume
-            videoPlayer.playVideo()
-        }
-        setIsPlaying(!isPlaying)
-    }
-
-    // Toggle Mute
-    const toggleMute = () => {
-        if (!videoPlayer) return
-        if (isMuted) {
-            videoPlayer.unMute()
-        } else {
-            videoPlayer.mute()
-        }
-        setIsMuted(!isMuted)
-    }
-
     const handleStart = () => {
-        userInteracted.current = true // Mark that user has initiated playback
+        userInteracted.current = true
         setStarted(true)
         if (videoPlayer && typeof videoPlayer.playVideo === 'function') {
-            videoPlayer.playVideo()
-            videoPlayer.unMute() // Ensure it's not muted by default
-            setIsPlaying(true)
+            // Video is already playing muted from preload — just unmute
+            videoPlayer.unMute()
+            videoPlayer.playVideo() // Ensure it's playing in case preload was blocked
         } else {
             console.warn("Player not ready on start")
         }
@@ -357,7 +331,6 @@ export function ViewerPage() {
                             if (videoPlayer && typeof videoPlayer.playVideo === 'function') {
                                 videoPlayer.playVideo()
                                 videoPlayer.unMute()
-                                setIsPlaying(true)
                             }
                         }} />
                     </div>
@@ -383,24 +356,6 @@ export function ViewerPage() {
                             ) : (
                                 <>
                                     <StoryViewer wrapped={wrapped} />
-
-                                    {/* Music Controls */}
-                                    {wrapped.bgMusicUrl && (
-                                        <div className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/20">
-                                            <button
-                                                onClick={toggleMute}
-                                                className="p-1.5 rounded-full hover:bg-white/20 text-[var(--color-neutral-900)] transition-colors"
-                                            >
-                                                {isMuted ? <span className="material-icons-round text-sm">volume_off</span> : <span className="material-icons-round text-sm">volume_up</span>}
-                                            </button>
-                                            <button
-                                                onClick={togglePlay}
-                                                className="p-1.5 rounded-full hover:bg-white/20 text-[var(--color-neutral-900)] transition-colors"
-                                            >
-                                                {isPlaying ? <span className="material-icons-round text-sm">pause</span> : <span className="material-icons-round text-sm">play_arrow</span>}
-                                            </button>
-                                        </div>
-                                    )}
                                 </>
                             )}
                         </ViewerLayout>
