@@ -366,7 +366,7 @@ export function ViewerPage() {
 
             {/* Hidden Player Container - Always present to keep music playing */}
             {/* Must be persistent across all states to prevent unmounting/remounting issues with YouTube API */}
-            <div id="bg-music-player" className="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none -z-50" />
+            <div id="bg-music-player" className="fixed top-0 left-0 w-full h-full opacity-[0.001] pointer-events-none z-[100]" />
 
             {renderContent()}
         </div>
