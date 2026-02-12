@@ -29,7 +29,7 @@ export const api = {
                 owner_name: data.ownerName,
                 partner_name: data.partnerName,
                 bg_music_url: data.bgMusicUrl,
-                bg_music_start_time: data.bgMusicStartTime,
+                bg_music_start_time: data.bgMusicStartTime ? Math.floor(Number(data.bgMusicStartTime)) : 0,
                 global_theme: data.globalTheme,
                 data: initialData
             })
@@ -63,7 +63,7 @@ export const api = {
             title: updates.title,
             is_password_protected: updates.isPasswordProtected,
             bg_music_url: updates.bgMusicUrl,
-            bg_music_start_time: updates.bgMusicStartTime,
+            bg_music_start_time: updates.bgMusicStartTime ? Math.floor(Number(updates.bgMusicStartTime)) : 0,
             global_theme: updates.globalTheme,
             owner_name: updates.ownerName,
             partner_name: updates.partnerName
