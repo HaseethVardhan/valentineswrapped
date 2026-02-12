@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { Heart, Lock } from "lucide-react"
 
@@ -37,6 +37,7 @@ export function ViewerPage() {
     const [isPlaying, setIsPlaying] = useState(false)
     const [isMuted, setIsMuted] = useState(false)
     const [videoPlayer, setVideoPlayer] = useState<any>(null)
+    const userInteracted = useRef(false) // Tracks if user has explicitly started playback
 
     // Get potential local draft
     const localWrapped = useEditorStore(state => state.wrapped)
@@ -60,8 +61,8 @@ export function ViewerPage() {
 
             try {
                 new window.YT.Player('bg-music-player', {
-                    height: '1',
-                    width: '1',
+                    height: '200',
+                    width: '200',
                     videoId: videoId,
                     playerVars: {
                         'playsinline': 1,
@@ -72,12 +73,21 @@ export function ViewerPage() {
                         'start': wrapped.bgMusicStartTime || 0,
                         'disablekb': 1,
                         'fs': 0,
-                        'modestbranding': 1
+                        'modestbranding': 1,
+                        'origin': window.location.origin
                     },
                     events: {
                         'onReady': (event: any) => {
                             setVideoPlayer(event.target)
                             event.target.setVolume(50) // Set reasonable starting volume
+                        },
+                        'onStateChange': (event: any) => {
+                            // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
+                            if (event.data === 1) {
+                                setIsPlaying(true)
+                            } else if (event.data === 2 || event.data === 0) {
+                                setIsPlaying(false)
+                            }
                         },
                         'onError': (e: any) => console.error("YouTube Player Error:", e)
                     }
@@ -146,13 +156,14 @@ export function ViewerPage() {
 
     // Keep-alive for mobile audio
     useEffect(() => {
-        if (!started || !isPlaying || !videoPlayer || typeof videoPlayer.getPlayerState !== 'function') return
+        if (!started || !videoPlayer || typeof videoPlayer.getPlayerState !== 'function') return
+        if (!userInteracted.current) return // Only keep-alive after user has explicitly started playback
 
         const checkAndPlay = () => {
             try {
                 const state = videoPlayer.getPlayerState()
                 // If it's paused (2), ended (0), cued (5), or unstarted (-1)
-                // And we want it to be playing
+                // And the user has started playback, try to resume
                 if (state !== 1 && state !== 3) {
                     videoPlayer.playVideo()
                 }
@@ -161,21 +172,30 @@ export function ViewerPage() {
             }
         }
 
-        const interval = setInterval(checkAndPlay, 2000) // Check every 2 seconds
+        const interval = setInterval(checkAndPlay, 1000) // Check every 1 second (faster for mobile)
 
         const handleInteraction = () => {
             checkAndPlay()
         }
 
+        // Resume audio when the page becomes visible again (after app switch, lock/unlock)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && userInteracted.current) {
+                checkAndPlay()
+            }
+        }
+
         window.addEventListener('touchstart', handleInteraction)
         window.addEventListener('click', handleInteraction)
+        document.addEventListener('visibilitychange', handleVisibilityChange)
 
         return () => {
             clearInterval(interval)
             window.removeEventListener('touchstart', handleInteraction)
             window.removeEventListener('click', handleInteraction)
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
-    }, [started, isPlaying, videoPlayer])
+    }, [started, videoPlayer])
 
     // Toggle Play/Pause
     const togglePlay = () => {
@@ -200,7 +220,7 @@ export function ViewerPage() {
     }
 
     const handleStart = () => {
-
+        userInteracted.current = true // Mark that user has initiated playback
         setStarted(true)
         if (videoPlayer && typeof videoPlayer.playVideo === 'function') {
             videoPlayer.playVideo()
@@ -326,10 +346,11 @@ export function ViewerPage() {
                 {showIntro ? (
                     <div className="relative z-50">
                         <IntroSequence onComplete={() => {
+                            userInteracted.current = true // Mark user gesture
                             setShowIntro(false)
                             setStarted(true)
-                            // Auto-play music if possible? 
-                            if (videoPlayer) {
+                            // Play music — called synchronously inside the user's tap handler chain
+                            if (videoPlayer && typeof videoPlayer.playVideo === 'function') {
                                 videoPlayer.playVideo()
                                 videoPlayer.unMute()
                                 setIsPlaying(true)
@@ -399,7 +420,7 @@ export function ViewerPage() {
 
             {/* Hidden Player Container - Always present to keep music playing */}
             {/* Must be persistent across all states to prevent unmounting/remounting issues with YouTube API */}
-            <div id="bg-music-player" className="fixed top-0 left-0 w-full h-full opacity-[0.001] pointer-events-none z-[100]" />
+            <div id="bg-music-player" className="fixed pointer-events-none" style={{ left: '-9999px', top: '-9999px', width: '200px', height: '200px' }} />
 
             {renderContent()}
         </div>
