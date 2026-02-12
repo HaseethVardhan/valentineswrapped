@@ -381,7 +381,7 @@ export function EditorPage() {
                                                 <span className="material-icons-round text-3xl">favorite</span>
                                             </div>
                                             <h2 className="text-3xl font-serif text-[var(--color-neutral-900)] italic">
-                                                See you soon...
+                                                Happy Valentine's Day
                                             </h2>
                                             <p className="text-3xl leading-relaxed whitespace-pre-wrap font-handwriting text-[var(--color-neutral-800)]">
                                                 {activePage.content.message || "Enter your final message here."}
