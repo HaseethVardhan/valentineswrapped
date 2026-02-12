@@ -38,6 +38,7 @@ export function ViewerPage() {
     const [isMuted, setIsMuted] = useState(false)
     const [videoPlayer, setVideoPlayer] = useState<any>(null)
     const userInteracted = useRef(false) // Tracks if user has explicitly started playback
+    const userPaused = useRef(false) // Tracks if user has explicitly paused
 
     // Get potential local draft
     const localWrapped = useEditorStore(state => state.wrapped)
@@ -160,6 +161,7 @@ export function ViewerPage() {
         if (!userInteracted.current) return // Only keep-alive after user has explicitly started playback
 
         const checkAndPlay = () => {
+            if (userPaused.current) return // Don't override user's explicit pause
             try {
                 const state = videoPlayer.getPlayerState()
                 // If it's paused (2), ended (0), cued (5), or unstarted (-1)
@@ -201,8 +203,10 @@ export function ViewerPage() {
     const togglePlay = () => {
         if (!videoPlayer) return
         if (isPlaying) {
+            userPaused.current = true // Signal keep-alive to stop resuming
             videoPlayer.pauseVideo()
         } else {
+            userPaused.current = false // Allow keep-alive to resume
             videoPlayer.playVideo()
         }
         setIsPlaying(!isPlaying)
