@@ -11,7 +11,7 @@ export function LandingPage() {
             {/* Navbar */}
             <nav className="fixed top-0 w-full z-50 px-6 py-4 md:px-10 flex justify-between items-center bg-gradient-to-b from-secondary/90 to-transparent backdrop-blur-[1px]">
                 <div className="flex items-center gap-2 transition-opacity hover:opacity-80">
-                    <span className="font-serif italic text-2xl md:text-3xl text-primary tracking-tight">Wrapped.love</span>
+                    <span className="font-serif italic text-2xl md:text-3xl text-primary tracking-tight">valentineswrapped</span>
                 </div>
                 <button className="group flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/50 border border-white/60 hover:bg-white hover:scale-105 transition-all duration-300 shadow-sm cursor-pointer">
                     <span className="material-symbols-outlined text-primary text-xl md:text-2xl group-hover:scale-110 transition-transform">favorite</span>
@@ -73,15 +73,7 @@ export function LandingPage() {
                 </div>
             </main>
 
-            {/* Footer */}
-            <footer className="w-full py-6 text-center text-foreground/50 text-xs font-light">
-                <div className="flex justify-center gap-6 mb-2">
-                    <a className="hover:text-primary transition-colors duration-200" href="#">How it works</a>
-                    <a className="hover:text-primary transition-colors duration-200" href="#">Examples</a>
-                    <a className="hover:text-primary transition-colors duration-200" href="#">Privacy</a>
-                </div>
-                <p>© 2024 Wrapped.love</p>
-            </footer>
+
 
             {/* Font variation settings for symbols */}
             <style>{`
