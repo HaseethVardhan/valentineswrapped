@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Refined Wrapped Editor V3</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff8fa3","primary-dark": "#ff5c7c",
+                        "secondary": "#ffb3c1",
+                        "background-light": "#fff0f3","background-dark": "#2d1b22",
+                        "surface": "#ffffff",
+                        "neutral-900": "#4a2c35",
+                        "neutral-800": "#6d3d4d",
+                        "neutral-600": "#9e5f73",
+                        "neutral-400": "#cba5b1",
+                        "neutral-200": "#f2dce2",
+                        "neutral-100": "#faedf0",
+                        "neutral-50": "#fff5f7",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1.25rem",
+                        "xl": "1.75rem",
+                        "2xl": "2.25rem",
+                        "3xl": "3rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "soft": "0 10px 40px -10px rgba(255, 143, 163, 0.15)",
+                        "float": "0 20px 50px -12px rgba(255, 92, 124, 0.25)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .device-frame {
+            box-shadow: 0 0 0 8px #ffffff, 0 20px 60px -10px rgba(255, 143, 163, 0.3);
+            border-radius: 2.5rem;
+        }
+        .floral-pattern {
+            background-color: #fff0f3;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffc2d1' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="bg-background-light text-neutral-900 font-display min-h-screen overflow-hidden flex flex-col">
+<header class="w-full h-20 bg-transparent flex items-center justify-between px-8 z-50 shrink-0">
+<div class="flex items-center gap-4 w-1/3">
+<button class="p-3 rounded-full bg-white/50 hover:bg-white shadow-sm transition-all text-primary-dark">
+<span class="material-icons-round">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-primary-dark uppercase tracking-widest mb-0.5">My Love</span>
+<div class="group flex items-center gap-2 cursor-pointer">
+<input class="bg-transparent border-none p-0 text-xl font-bold text-neutral-800 focus:ring-0 focus:outline-none w-56 placeholder-neutral-400/70" type="text" value="Valentine's Wrapped"/>
+<span class="material-icons-round text-sm text-primary-dark/50 opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-center w-1/3">
+<div class="px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-sm border border-white/40 shadow-sm flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Auto-saved</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-4 w-1/3">
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/50 hover:bg-white transition-all text-neutral-700 font-medium">
+<span class="material-icons-round text-xl text-primary-dark">visibility</span>
+<span class="hidden sm:inline">Preview</span>
+</button>
+<button class="bg-gradient-to-r from-primary to-primary-dark hover:shadow-lg hover:shadow-primary/30 text-white px-7 py-2.5 rounded-full font-bold transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+<span>Share Love</span>
+<span class="material-icons-round text-lg">favorite</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden relative mx-6 mb-6 rounded-3xl bg-white shadow-soft ring-1 ring-white/60">
+<aside class="w-20 lg:w-72 bg-white flex flex-col z-10 hidden md:flex rounded-l-3xl border-r border-neutral-100">
+<div class="flex-1 overflow-y-auto p-6 custom-scrollbar flex flex-col">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-xl font-bold text-neutral-800 tracking-tight">Pages</h3>
+<button class="w-8 h-8 flex items-center justify-center text-primary-dark bg-primary/10 hover:bg-primary/20 rounded-full transition-colors">
+<span class="material-icons-round text-xl">add</span>
+</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100 hover:border-primary/30 cursor-pointer transition-all group">
+<div class="w-8 h-8 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-400 group-hover:text-primary group-hover:border-primary/30 transition-colors">1</div>
+<span class="font-medium text-neutral-700 group-hover:text-neutral-900">Intro</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-white border border-primary ring-2 ring-primary/10 shadow-sm cursor-pointer transition-all">
+<div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center text-xs font-bold shadow-sm">2</div>
+<span class="font-bold text-neutral-900">First Date</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100 hover:border-primary/30 cursor-pointer transition-all group">
+<div class="w-8 h-8 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-400 group-hover:text-primary group-hover:border-primary/30 transition-colors">3</div>
+<span class="font-medium text-neutral-700 group-hover:text-neutral-900">Our Song</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100 hover:border-primary/30 cursor-pointer transition-all group">
+<div class="w-8 h-8 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-400 group-hover:text-primary group-hover:border-primary/30 transition-colors">4</div>
+<span class="font-medium text-neutral-700 group-hover:text-neutral-900">Travels</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100 hover:border-primary/30 cursor-pointer transition-all group">
+<div class="w-8 h-8 rounded-lg bg-white border border-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-400 group-hover:text-primary group-hover:border-primary/30 transition-colors">5</div>
+<span class="font-medium text-neutral-700 group-hover:text-neutral-900">Future Plans</span>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-neutral-100 bg-neutral-50/50">
+<button class="w-full py-3 px-4 rounded-xl border border-dashed border-neutral-300 text-neutral-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium">
+<span class="material-icons-round">add</span>
+                Add New Page
+            </button>
+</div>
+</aside>
+<section class="flex-1 floral-pattern relative flex flex-col items-center justify-center p-8 overflow-hidden rounded-r-3xl xl:rounded-r-none">
+<div class="absolute top-10 right-10 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none mix-blend-multiply"></div>
+<div class="absolute bottom-10 left-10 w-72 h-72 bg-secondary/20 rounded-full blur-[80px] pointer-events-none mix-blend-multiply"></div>
+<div class="relative w-full max-w-[340px] aspect-[9/16] bg-white device-frame overflow-hidden flex flex-col shrink-0 transition-transform duration-500 ease-out hover:scale-[1.01] z-20">
+<div class="h-10 w-full flex justify-between items-center px-6 pt-3 select-none text-[10px] font-bold text-neutral-800 z-20 absolute top-0 left-0 right-0 bg-gradient-to-b from-white/80 to-transparent">
+<span>9:41</span>
+<div class="flex gap-1.5 opacity-60">
+<span class="material-icons-round text-[14px]">signal_cellular_alt</span>
+<span class="material-icons-round text-[14px]">wifi</span>
+<span class="material-icons-round text-[14px]">battery_full</span>
+</div>
+</div>
+<div class="flex-1 relative w-full h-full bg-[#FFF5F7] overflow-y-auto no-scrollbar pt-12 pb-6">
+<div class="absolute top-3 right-4 z-30">
+<button class="w-8 h-8 rounded-full bg-white/40 backdrop-blur-md hover:bg-white/60 flex items-center justify-center text-neutral-700 transition-colors">
+<span class="material-icons-round text-lg">more_horiz</span>
+</button>
+</div>
+<div class="px-6 flex flex-col gap-6 min-h-full">
+<div class="relative w-full aspect-[4/3] bg-white p-2 shadow-sm rounded-2xl overflow-hidden shrink-0 mt-4">
+<img alt="Two people laughing together in a park" class="w-full h-full object-cover rounded-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjVO74SrjWa5gTHGozGaKZ59fcglYQzgnS9VwgBmLsEVEzfbBJE6KNANlUBioNTAxTvxvMBV0LLuUNe-qM56dIFrSRQ6uWq6cofwUB_0zZZRBVdc00Un8frMdAcO-s83sNmwjvxIkyvWmyi7bn_9_OsR3S23KmUpvuRss5mTQJuXtNM5ajdeJQ4a4Ej0gXL66Tf2P4kfkvnvSRSvDjeSX6mlgkMhUmH6HafZ_BSeuxL6q4YfJFb4s414dPqp0dIqy0mIbUCDs"/>
+</div>
+<div class="flex flex-col gap-3">
+<h2 class="text-2xl font-bold text-neutral-800 leading-tight">The day everything changed</h2>
+<div class="text-xs text-neutral-500 font-medium uppercase tracking-widest flex items-center gap-2">
+<span class="w-8 h-px bg-neutral-300"></span>
+                            August 14, 2023
+                        </div>
+<div class="prose prose-sm prose-pink text-neutral-600 leading-relaxed font-medium">
+<p>It started as just coffee, but somehow turned into a six-hour conversation about everything from our favorite childhood cartoons to our deepest fears.</p>
+<p class="mt-2">I remember looking at you while you were explaining your theory about time travel and thinking, "Oh, I'm in trouble."</p>
+<p class="mt-2">The sun was setting behind us, painting everything in shades of gold and pink, just like this page. I didn't want the evening to end.</p>
+<p class="mt-2">That was the moment I knew this wasn't just another date. It was the beginning of my favorite story.</p>
+</div>
+</div>
+<div class="mt-auto pt-8 flex justify-center pb-4">
+<span class="material-icons-round text-primary/30 animate-bounce">keyboard_arrow_down</span>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-6 right-6 flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-white">
+<button class="text-neutral-500 hover:text-primary-dark transition-colors">
+<span class="material-icons-round text-lg">remove</span>
+</button>
+<span class="text-xs font-bold text-neutral-600 w-8 text-center">100%</span>
+<button class="text-neutral-500 hover:text-primary-dark transition-colors">
+<span class="material-icons-round text-lg">add</span>
+</button>
+</div>
+</section>
+<aside class="w-80 bg-white hidden xl:flex flex-col z-10 rounded-r-3xl border-l border-neutral-100">
+<div class="p-6">
+<h2 class="font-bold text-lg text-neutral-800">Story Content</h2>
+<p class="text-xs text-neutral-500 mt-1">Edit your memories</p>
+</div>
+<div class="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar space-y-8">
+<div>
+<label class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Text</label>
+<textarea class="w-full p-4 rounded-xl bg-neutral-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 text-sm leading-relaxed text-neutral-700 transition-all resize-none" rows="8">It started as just coffee, but somehow turned into a six-hour conversation about everything from our favorite childhood cartoons to our deepest fears.
+I remember looking at you while you were explaining your theory about time travel and thinking, "Oh, I'm in trouble."</textarea>
+</div>
+<div>
+<label class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Typography</label>
+<div class="space-y-4">
+<div class="flex items-center justify-between bg-neutral-50 p-3 rounded-xl cursor-pointer hover:bg-neutral-100 transition-colors">
+<span class="text-sm font-medium text-neutral-700">Plus Jakarta Sans</span>
+<span class="material-icons-round text-neutral-400">expand_more</span>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-2.5 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors font-bold text-neutral-700">B</button>
+<button class="flex-1 py-2.5 bg-primary/10 text-primary-dark rounded-xl font-medium italic">I</button>
+<button class="flex-1 py-2.5 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors underline decoration-2 underline-offset-2 text-neutral-700">U</button>
+</div>
+</div>
+</div>
+<div>
+<label class="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Media</label>
+<div class="grid grid-cols-2 gap-3">
+<div class="aspect-square rounded-xl overflow-hidden relative group cursor-pointer">
+<img alt="Two people laughing together in a park" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjVO74SrjWa5gTHGozGaKZ59fcglYQzgnS9VwgBmLsEVEzfbBJE6KNANlUBioNTAxTvxvMBV0LLuUNe-qM56dIFrSRQ6uWq6cofwUB_0zZZRBVdc00Un8frMdAcO-s83sNmwjvxIkyvWmyi7bn_9_OsR3S23KmUpvuRss5mTQJuXtNM5ajdeJQ4a4Ej0gXL66Tf2P4kfkvnvSRSvDjeSX6mlgkMhUmH6HafZ_BSeuxL6q4YfJFb4s414dPqp0dIqy0mIbUCDs"/>
+<div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-icons-round text-white">edit</span>
+</div>
+</div>
+<button class="aspect-square rounded-xl border-2 border-dashed border-neutral-200 flex flex-col items-center justify-center text-neutral-400 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all gap-1">
+<span class="material-icons-round">add_photo_alternate</span>
+<span class="text-[10px] font-bold uppercase">Replace</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</main>
+</body></html>

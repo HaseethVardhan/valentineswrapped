@@ -1,0 +1,1038 @@
+1. Landing / Home Screen
+Purpose
+
+Convert visitors into creators by quickly communicating the value and letting them start in one tap. Social proof + demo.
+
+Layout (single column, scrollable)
+
+Top nav (minimal)
+
+Left: small logo (tappable → home)
+
+Right: “Demo” button (icon) — opens demo wrapped readonly overlay
+
+Hero block (full-bleed card)
+
+Headline (large): “Create a private, beautiful Wrapped for your partner”
+
+Subhead (smaller): “Photos, songs, promises — one private link.”
+
+Primary CTA button (prominent): Create your Wrapped
+
+Style: large rounded rectangle, sticky near bottom on long scroll
+
+Secondary CTA (text link below): Preview demo
+
+Social proof / counter row
+
+Icon (heart) + text: “12,483 Wrappeds created” (live-updating number)
+
+Small lock icon + text: “Private links · Optional passwords · No accounts”
+
+Demo carousel (tap-through)
+
+Small interactive preview (one-thumb swipe)
+
+Tapping an item → Demo fullscreen viewer (same as partner viewer but in read-only)
+
+How it works (3 cards horizontally scrollable)
+
+Card 1: Create → short copy, icon
+
+Card 2: Customize → short copy
+
+Card 3: Share → short copy
+
+Footer CTA (repeat)
+
+Button: Create your Wrapped
+
+Footer legal
+
+Links: Privacy · Terms · About
+
+Microcopy & placeholders
+
+CTA: “Create your Wrapped”
+
+Counter: “X Wrappeds created”
+
+Demo CTA: “Tap to preview — real mobile experience”
+
+States & behaviors
+
+Hero CTA tap: quick tactile vibration (if supported) → navigate to Create Wrapped screen.
+
+Demo tap: open Demo fullscreen viewer overlay. Load demo assets lazy; show shimmer placeholders while images load.
+
+Counter: if the real count is unavailable, show fallback "Thousands created" to avoid blank.
+
+Animations
+
+Hero entry: headline fade + gentle scale from 0.98 → 1.0
+
+Demo carousel: swipe with parallax (small)
+
+Accessibility
+
+Headline uses semantic H1
+
+Buttons have large touch targets (>=44px)
+
+Images have alt text in demo for screen readers
+
+Color contrast checked for CTA
+
+2. Create Wrapped Screen (Password / Basic Info)
+Purpose
+
+Collect the minimum metadata and let user optionally protect their Wrapped with a password. Keep it emotional, not technical.
+
+Layout (single column)
+
+Back button (top-left icon) — returns to Landing
+
+Title (large): “Create your Wrapped”
+
+Subtext: “A private web keepsake for your partner. No account required.”
+
+Form card:
+
+Input: Your name (placeholder: “Your name…”) — optional but encouraged
+
+Input: Partner name (placeholder: “For …”) — optional
+
+Toggle row: Protect with password? (switch)
+
+When OFF: show text: “Your Wrapped will be accessible via private link.”
+
+When ON: show password input(s):
+
+Input: Enter password (placeholder: “Choose a password”)
+
+Input: Confirm password (only show on focus or if mismatch)
+
+Password rules helper (small): “4–20 characters. Don’t use obvious words.”
+
+Eye icon to reveal/hide password
+
+CTA (primary): Start Creating
+
+Secondary: small link: “Skip and create without password” (same as toggle OFF)
+
+Small tip at bottom: “You can add/change password later.”
+
+States & validation
+
+Inputs validate inline:
+
+Empty partner/your name = allowed (no required fields)
+
+Password toggle ON + empty password on submit → show inline error: “Please enter a password or toggle off protection.”
+
+Password mismatch → “Passwords don’t match.”
+
+Network save: as soon as user taps Start Creating, create Wrapped on backend and navigate to Editor with a tiny toast “Saving…” then success animation.
+
+If network fails: show a persistent banner "Couldn't create Wrapped. Try again." with Retry button.
+
+Animations & transitions
+
+Toggle ON: slide-down password field with cross-fade.
+
+On successful create: small confetti burst on the CTA and transition to Editor screen (slide-left).
+
+Accessibility
+
+Password inputs labeled and announced to screen readers.
+
+Provide clear focus outlines.
+
+3. Wrapped Editor — Shell & Main Controls (central hub)
+Purpose
+
+Primary workspace to build the Wrapped. Editor must feel light, fast, and preserve quality with presets.
+
+Overall layout (mobile-first):
+
+Because mobile cannot show left-center-right simultaneously, use a single-column with slide-in panels:
+
+Top bar (fixed):
+
+Left: Close / Back (if user tries to exit show unsaved changes modal)
+
+Center: Wrapped title (editable inline)
+
+Right: Preview icon (eye) + Create (Primary CTA) — Create is prominent and sticky to top-right.
+
+Main canvas area (center): shows the currently selected page in an editable, WYSIWYG-like view
+
+Bottom toolbar (sticky):
+
+Left: Pages button (opens Pages sidebar as sheet)
+
+Middle: Add page (+) (quick add)
+
+Right: Templates / Customize (opens customization sheet)
+
+Slide-in panels:
+
+Pages sheet (left semantics): full-screen sheet from left or bottom; lists pages
+
+Customize sheet (right): bottom sheet with template thumbnails and property controls
+
+Floating Undo/Redo above bottom toolbar (small chips) — optional
+
+Top-level controls & microcopy
+
+Title placeholder: “Untitled Wrapped — tap to rename”
+
+Save status: tiny "Saved" or spinner while saving (auto-save always)
+
+Auto-save: every change saved to DB; show “Saved 12s ago” microcopy.
+
+States
+
+Initial empty page: When new Wrapped created it creates a default Scrapbook page with sample content to reduce writer’s block.
+
+Editing: immediate local update, then auto-save to backend; show small toast or status.
+
+Offline: if offline, mark "Offline — changes will sync when you’re back online." Provide Retry sync button.
+
+Interactions & constraints
+
+Max pages cap: 10 (show soft guidance: “We recommend 3–7 pages for best pacing”).
+
+Quick undo: shake-to-undo? Better: small Undo button.
+
+When trying to leave with unsaved changes (if offline not synced): confirm modal: “You have unsynced changes — save & exit or keep editing”.
+
+4. Pages Sidebar (Add / Reorder / Delete) — Slide-in sheet
+Purpose
+
+Manage page order, add new pages, delete, rename, and quick preview thumbnails.
+
+Layout (sheet)
+
+Header: "Pages" + Close
+
+List (vertical):
+
+Each item:
+
+Drag handle (left)
+
+Icon (Scrapbook / Coupon / Playlist / Summary)
+
+Title (editable inline: "Page 1 — Our Trip")
+
+Mini-thumbnail (small)
+
+Options menu (three-dot): Duplicate / Delete / Preview
+
+Button at bottom: + Add Page (opens Add Page modal)
+
+Footer text: “Tip: Drag to reorder your story”
+
+Actions
+
+Drag reorder: press-hold drag; on reorder, animate trailing cards; auto-save new order.
+
+Delete: tapping delete opens confirm: “Delete this page? This cannot be undone.” with Cancel / Delete.
+
+Duplicate: clones page content into new page (useful for repeats)
+
+Preview: quick fullscreen preview of that page.
+
+Edge cases
+
+Delete last page: prevent zero pages — show “You must have at least 1 page”.
+
+Reorder with a lot of pages: show auto-scroll if dragging near top/bottom.
+
+5. Add Page Modal (sheet)
+Purpose
+
+Guide the user to pick a page type (Scrapbook, Coupon, Playlist, Relationship Summary).
+
+Layout
+
+Title: "Add a page"
+
+Grid of options (2 columns):
+
+Scrapbook — icon + one-liner: “Photos & captions”
+
+Love Coupon — icon + “Promises they can redeem”
+
+Playlist — icon + “A song and a note”
+
+Wrapped Summary — icon + “A highlight reel” (disabled if certain conditions not met; show tooltip)
+
+Each option tap → adds page to end and opens editor for that page with a smooth slide-in animation.
+
+Small details
+
+Provide a tiny sample thumbnail for each template.
+
+If max pages reached: show disabled state + explain the recommendation.
+
+6. Page Editor — Scrapbook Page (center content)
+Purpose
+
+Add images + text blocks for each image, arrange order, and set per-page styling.
+
+Layout (stack)
+
+Page header: page title (editable)
+
+Gallery area (carousel)
+
+Left/right small chevrons; swipe to move
+
+Each slide shows image + overlay text block(s)
+
+Controls below gallery:
+
+Add Image (camera icon) — opens action sheet: Upload from device / Camera / Pick from recent
+
+Add text block (plus) — opens text editor (inline)
+
+Rearrange images (open reorder modal / drag)
+
+Image edit (tap image → image options: replace, crop, rotate, delete)
+
+Image caption area (per image): inline WYSIWYG text with prompts:
+
+Placeholder prompt: “What do you remember here?”
+
+Small tip: “We recommend 1–4 images per page for best pacing.”
+
+Upload behavior
+
+Client-side compress and resize to max width (1920) and quality (80%).
+
+Show upload progress bar overlay on each image tile.
+
+On upload success → animate image fade-in.
+
+On failure → show error overlay: Retry / Remove.
+
+States
+
+Empty: show big dashed-dropzone with “Tap to add photo” and sample image placeholder.
+
+Loading: skeleton for media and spinner
+
+Error: inline message with Retry
+
+Accessibility
+
+Allow alt text for images (optional but encouraged) with hint: “Describe the moment in one line”.
+
+Animations
+
+When moving between images: slight parallax and the butterfly motif flies across from previous to new image (global motif).
+
+Text blocks animate in with typewriter-like gentle fade when entering preview.
+
+7. Page Editor — Love Coupon Page
+Purpose
+
+Create small promises the partner can redeem.
+
+Layout
+
+Page header: "Love Coupons" (editable)
+
+List of coupon cards (stack)
+
+Each coupon card:
+
+Title (input, placeholder: “Movie night”)
+
+Description (textarea, placeholder: “You pick the movie — popcorn included”)
+
+Toggle: Redeemable (on/off) — by default ON
+
+Small icon chooser (optional; heart, ticket, plate)
+
+Actions:
+
+Add coupon (max 6; show suggestion)
+
+Reorder (drag)
+
+Mark a coupon as “Special” (adds small badge)
+
+CTA microcopy: “Make it personal — add a little note to each coupon.”
+
+Redeem metadata (for partner side)
+
+When redeemed on partner viewer, set redeemedAt timestamp stored server-side so it remains redeemed.
+
+Animations
+
+Adding a coupon: card slides in with sparkle
+
+Deleting: card flips and fades out
+
+States
+
+Empty: show template examples of sample coupons
+
+Validation: Title required when tapping Create? No — allow drafts. But warn if trying to create with no content: “No coupons yet — are you sure?”
+
+8. Page Editor — Playlist Page
+Purpose
+
+Attach a Spotify or YouTube link and a small custom message.
+
+Layout
+
+Page title editable
+
+Input: Paste a Spotify / YouTube link (or search? — keep simple: paste)
+
+On paste: detect service and show small embed preview:
+
+Spotify: show album art, song title, artist + play button (embedded)
+
+YouTube: thumbnail + play button
+
+Text area: message to partner
+
+Small toggle: Autoplay on open (default OFF — because of mobile autoplay rules)
+
+Tip: “Add one song per page to keep the pacing emotional.”
+
+States
+
+Invalid link: inline error: “We didn’t recognize that link. Try a Spotify or YouTube song URL.”
+
+Loading embed: shimmer preview
+
+Notes
+
+For autoplay: the viewer will ask user to tap to start audio (intro screen). Don’t rely on automatic playback.
+
+9. Page Customization Sheet (templates and properties)
+Purpose
+
+Change visuals for the currently selected page and set global Wrapped options.
+
+Layout (bottom sheet, tabbed)
+
+Tabs: Page style | Global settings
+
+Page style tab:
+
+Theme presets (horizontal carousel of preset thumbnails)
+
+Each preset contains: background color/gradient, font set (serif/handwritten), animation style (soft/drift/cinematic)
+
+Color picker (limited palette of 6) — selecting a color switches to custom mode
+
+Font size slider (small/regular/large)
+
+Text color: auto suggestion for contrast
+
+Background image upload (optional; for special pages)
+
+Animation selector: small icons indicating the style (butterfly trail / light-particles / slow float)
+
+Global settings tab:
+
+Background song selector (applies to whole Wrapped)
+
+Input for Spotify/YouTube link or choose none
+
+Global transition style: Page flip / Fade / Cinematic slide
+
+Global volume default (0–100)
+
+Page duration (auto-advance) toggle & timer (if enabled, auto-advances after Xs in viewer)
+
+States & behaviors
+
+Apply preset instantly to preview on canvas
+
+Unsaved changes are auto-saved
+
+If an animation requires assets, lazy-load them
+
+Constraints
+
+Limit custom fonts to ensure correct rendering across devices
+
+For background image, recommend lower resolution and show warning about large files
+
+10. Preview Screen (Creator preview)
+Purpose
+
+Let the creator see the final viewer experience exactly as partner will see (except password gate).
+
+Layout (fullscreen modal)
+
+Top-left: Close / Exit preview
+
+Top-right: Edit (go back to editor)
+
+Main content: full-screen player showing pages, transitions, music controls (play/pause), progress indicator (dots or progress bar)
+
+Bottom: “Looks good? Create” CTA
+
+Behaviors
+
+Tap anywhere: toggle UI chrome (hide/show controls) to simulate immersive mode
+
+Swipe navigation enabled
+
+If background song exists and browser blocks autoplay, show overlay: “Tap to start audio & cinematic intro” — single-tap triggers everything
+
+States
+
+Loading: full-screen loader
+
+Mobile preview: shows how it looks on a narrow device; allow toggling between phone/ tablet preview
+
+Analytics events to emit
+
+preview.started
+
+preview.completed
+
+preview.edit_clicked
+
+11. Create / Finalize Action
+Purpose
+
+Persist final Wrapped, process assets, generate shareable link & QR, and redirect to Sharing screen.
+
+Microcopy & behavior
+
+On tapping Create:
+
+Validate there is at least one page with content, or show toast: “Your Wrapped is empty — add a page?”
+
+Show a short full-screen “Creating your Wrapped…” with subtle animation and progress indicator
+
+Backend tasks:
+
+Ensure all uploads completed and CDN URLs registered
+
+Generate slug (unguessable token)
+
+Set optional expiry (if user chose)
+
+On success → confetti animation then navigate to Sharing Screen
+
+On failure → show error with Retry
+
+Edge cases
+
+Partial upload: wait until all media uploads finish before finalizing; allow "Create anyway" with warning (missing assets).
+
+If user cancels during create: abort backend job gracefully.
+
+12. Sharing Screen (the moment of sending)
+Purpose
+
+Give the creator everything they need to share (link, QR, copy, quick share options) and reassure them about privacy.
+
+Layout (single column)
+
+Big checkmark + small headline: “Your Wrapped is ready!”
+
+Wrapped summary card: Cover image + title + small preview button
+
+Share link (text) — long, selectable field with Copy button
+
+QR code (tap to enlarge; long-press to save)
+
+Buttons:
+
+Copy link (primary)
+
+Share via... (native share sheet)
+
+View as partner (opens viewer in new tab)
+
+Small toggles / info:
+
+Password protection indicator (lock icon) + small "Change password" link
+
+Expiry info (if enabled)
+
+Footer tip: “Tip: Paste the link in a morning message to surprise them!”
+
+Behaviors
+
+Copy link: show ephemeral toast “Link copied!”
+
+Share via: opens native share sheet
+
+QR tap: expand to fullscreen with explanation: “Scan this to open the Wrapped”; save/share options
+
+Analytics events
+
+share.link_copied
+
+share.qr_viewed
+
+share.shared_via (channel)
+
+13. Partner Entry — Link click → Password Gate (if enabled)
+Purpose
+
+Security + anticipation.
+
+Flow & UX
+
+User taps shared link → open viewer route
+
+If Wrapped password exists:
+
+Show Password Unlock screen (center modal)
+
+Headline: “This Wrapped is private”
+
+Subtext: “Enter the password your partner gave you.”
+
+Password input (with reveal toggle)
+
+CTA: Unlock
+
+Small link: “I didn’t receive a password” — shows gentle help text: “Ask your partner to share it.”
+
+On correct password (server-verified):
+
+Fade out unlock modal → proceed to Intro cinematic screen
+
+On incorrect password:
+
+Shake animation + inline error: “That didn’t match. Try again.” (limit attempts UI? optional: rate-limit)
+
+After 5 failed attempts: show hint modal: “If you forgot the password, request it from the creator.” Optionally allow a request button that sends an email only if the creator opted in (avoid complexity).
+
+If no password:
+
+Proceed directly to Intro cinematic screen
+
+Accessibility
+
+For screen readers, announce the locked state and input focus.
+
+14. Intro Cinematic / Landing Experience (partner first impression)
+Purpose
+
+Create cinematic anticipation, request any permissions, and get the partner ready (tap to begin), all while avoiding browser autoplay restrictions.
+
+Layout & content
+
+Fullscreen canvas (video-like)
+
+Elements:
+
+Huge stylized title: “A Wrapped for [Partner Name]”
+
+Subtitle: small tagline (e.g., “A story made just for you”)
+
+Tap-to-begin card (center):
+
+Graphic (butterfly motif)
+
+Small copy: “Tap to begin — turn up your volume for the full effect”
+
+Buttons:
+
+Begin (primary)
+
+Mute (secondary)
+
+Small setting: Request fullscreen? (Only shown after Begin tap as a prompt: “Tap here to view full-screen”)
+
+If background song exists and autoplay will be blocked, show: “Tap to allow audio & cinematic intro.”
+
+Behavior
+
+Tapping Begin:
+
+Request user gesture → play audio, start animation timeline
+
+Optionally trigger browser fullscreen prompt (requestFullscreen) — show small explanation before requesting
+
+Begin cinematic sequence (3–6s): logo → title reveal → butterfly fly with soft particle animation toward first page
+
+If user declines fullscreen or audio, proceed anyway but with a smaller canvas and muted audio
+
+Animations & micro-interactions
+
+Title reveals via cinematic wipes (soft)
+
+Butterfly starts at top-right → arcs toward center, then flies off-screen along the path that becomes the guide between pages
+
+Small haptic feedback on devices that support it when Begin is tapped
+
+Edge cases
+
+If partner has reduced-motion preference: respect it and show simplified, slower animations
+
+If network slow: prerender a tiny intro fallback using local assets
+
+15. Partner Viewer — Page-by-page experience (main viewer)
+Purpose
+
+Deliver the emotional story full-screen, with audio, animations, and intuitive navigation.
+
+Layout (fullscreen)
+
+Content area (center): per-page layout (varies by page type)
+
+Top left: Exit/Close (small)
+
+Top right: Music button (play/pause) + Progress (small) + Settings (three-dot for accessibility options)
+
+Bottom center: Navigation controls small:
+
+Prev (left) / Next (right)
+
+Page index: e.g., “2 of 5” (tap to open page list overlay)
+
+Small persistent motif: Butterfly flying subtly along the top-right path, trailing light across transitions
+
+When controls hidden (immersive mode), swipe up to show
+
+Page interactions
+
+Swipe left/right to move between pages (pan velocity controlled)
+
+Tap center toggles control chrome
+
+Page auto-advance if creator set durations — show countdown ring on top-right near music controls
+
+Animations: when a page loads:
+
+Image(s) fade in with parallax
+
+Text lines animate (typewriter fade)
+
+Motif (butterfly) arcs across the content and lands on an anchor (e.g., heart icon)
+
+Performance: preload next page assets (lazy but prioritized)
+
+Per-page specifics
+Scrapbook page viewer:
+
+Full-bleed image(s) with caption overlay
+
+Swipe inside image carousel if multiple images (small dots)
+
+Tapping image opens zoom modal (pinch to zoom)
+
+Playlist page viewer:
+
+Embedded player UI (Spotify/YouTube embed)
+
+Message text above/below player
+
+Play/pause control interacts with global music control (one audio source only)
+
+Coupon page viewer:
+
+Coupons displayed as cards
+
+Each coupon with Redeem button (see next section)
+
+Coupon card shows small icon and hint (optional expiry)
+
+Wrapped Summary:
+
+Cinematic montage: small timeline with highlights, stat chips (songs shared, memories), and a final closing message
+
+Small interactions & effects
+
+Each tap produces a micro-animation (ripple, glow)
+
+Page transitions should feel cinematic: small parallax + motion blur (if enabled)
+
+Respect reduced motion: set preference in settings
+
+Accessibility & controls
+
+Provide captions/transcripts for embedded audio where possible
+
+Support for screen readers: pages have roles and labels
+
+High-contrast mode toggle in settings
+
+16. Coupon Redeem Flow (partner action)
+Purpose
+
+Let the partner mark a coupon redeemed — emotional micro-moment with animation and server persistence.
+
+UI on coupon card
+
+Redeem button (primary): Redeem (large)
+
+After redeeming, small status badge: Redeemed + timestamp (optional to show)
+
+Creator gets no push under normal conditions (since no accounts), but the redeemed state is recorded, so anyone opening the Wrapped sees it's redeemed.
+
+Flow & animation
+
+Tap Redeem → immediate micro-feedback (ripple)
+
+Confirm modal (optional): “Are you sure? This will mark the coupon as redeemed.” with Confirm / Cancel. For surprise effect you could skip confirmation and just show animation — choose based on desired UX.
+
+Recommendation: show one-tap confirm UI: small undo for 10 seconds.
+
+On confirm:
+
+Send server request to mark redeemed (show spinner on the button)
+
+On success:
+
+Play celebratory animation (burst of hearts + confetti + sound)
+
+Replace button with Redeemed ✓
+
+Show small message: “Enjoy! 🥰”
+
+On failure:
+
+Show inline error: “Couldn’t redeem right now — check your connection.” with Retry
+
+Constraints
+
+Mark coupon redeemed only once; subsequent viewers see redeemed state.
+
+Optionally show who redeemed (if multiple viewers allowed) — but with no auth this is not tracked.
+
+17. Viewer Settings & Controls (small overlay)
+Purpose
+
+Let partner control accessibility and playback.
+
+Options (three-dot menu)
+
+Music: Play / Pause / Volume slider
+
+Subtitles: If any audio has transcript (for Playlist/Intro)
+
+Reduced motion: toggle
+
+Report an issue: opens a small form
+
+Download a PDF (if creator enabled)
+
+Microcopy
+
+Volume label: “Music volume”
+
+Reduced motion: “Turn on to reduce animations”
+
+18. End / Final Page (closing emotional payoff)
+Purpose
+
+End the experience with a final message and a CTA to respond (optional).
+
+Layout
+
+Big closing message (creator-provided or default): “I love you — [Creator Name]”
+
+Small prompt: “Want to say something back?” (optional: opens small reply writer that sends a private note by generating a new Wrapped? — avoid complexity; better: offer “send thanks” quick-reply as a shareable template)
+
+Buttons:
+
+Share reaction (native share sheet)
+
+Replay
+
+Back to beginning
+
+Animation
+
+Slow fade-out with butterfly flying off-screen
+
+Soft soundtrack ending
+
+19. Error / Edge State Screens
+Wrapped expired / not found
+
+Headline: “This Wrapped is no longer available”
+
+Subtext: “It may have expired or been deleted.”
+
+Buttons: Create your own Wrapped (CTA) + Contact support
+
+Show small sample demo to keep engagement
+
+Invalid link
+
+Headline: “Invalid link”
+
+Copy: “Looks like this link isn’t valid — double-check the URL.”
+
+Password attempts exceeded
+
+Headline: “Too many attempts”
+
+Copy: “Try again later or ask your partner for the password.”
+
+Upload failure
+
+Inline message with Retry & Remove options
+
+If many failures: suggest checking network and compressing photos
+
+20. Small but critical micro-details & implementation notes
+Auto-save & drafts
+
+Auto-save every change locally and to backend
+
+Show last-saved timestamp
+
+If user closes accidentally: restore draft automatically (localStorage + server)
+
+Local preview thumbnails
+
+Generate small thumbnails client-side for pages to show quickly without fetching full images
+
+Upload & media limits
+
+Show a clear upload limit (file size per image, allowed formats)
+
+Show current storage usage for the Wrapped (optional)
+
+Performance — preloading strategy
+
+Preload only the first and next page assets
+
+Lazy-load the rest
+
+Use blurred image placeholders (LQIP) to improve perceived speed
+
+Autoplay & audio
+
+Use the Intro “Tap to begin” as the single user gesture to enable audio
+
+Provide visible play/pause and volume controls
+
+Respect device mute and reduced-motion settings
+
+Accessibility
+
+All interactive controls must be reachable via keyboard (for desktop) and screen reader accessible
+
+Provide alternative text for images
+
+Offer reduced-motion and text-size controls
+
+Privacy & security microcopy
+
+On Sharing screen: “This link is private — treat it like a secret. We do not create an account for you.”
+
+On Create screen: “Passwords are hashed and never stored in plain text.” — avoid claiming E2E unless implemented
+
+Analytics events (high-value)
+
+landing.cta_clicked
+
+create.started
+
+create.completed
+
+page.added
+
+page.deleted
+
+preview.started
+
+share.link_copied
+
+viewer.started
+
+coupon.redeemed
+
+viewer.finished
+
+Track these to measure funnel and friction.
+
+Compact screen-to-screen flow map (triggers & transitions)
+
+Landing
+
+CTA → Create Wrapped
+
+Demo → Demo Viewer (overlay)
+
+Create Wrapped
+
+Start Creating → create backend Wrapped → Editor (with small success confetti)
+
+Back → Landing (confirm if unsaved)
+
+Editor (Main)
+
+Pages button → Pages Sidebar (sheet)
+
+Add page → Add Page Modal → selects → opens page editor (center)
+
+Customize → Customize Sheet (bottom)
+
+Preview → Preview (fullscreen modal)
+
+Create (finalize) → Creating overlay → success → Sharing
+
+Close/Back → Landing (confirm unsaved)
+
+Sharing
+
+Copy link / Share → done
+
+View as partner → Viewer route (opens new tab)
+
+Partner clicks link → route viewer
+
+If password → Password Unlock → success → Intro Cinematic
+
+If no password → Intro Cinematic
+
+Intro Cinematic
+
+Tap Begin → trigger audio/fullscreen → animate into Viewer (page 1)
+
+Viewer (pages)
+
+Swipe / Next → subsequent pages
+
+On coupon page: Redeem → Redeem flow (animation + server write)
+
+End page → Final page → options: replay / share reaction / exit
+
+Exit → Landing or stay on viewer
+
+Suggested exact copy snippets (ready to use)
+
+Landing headline: “Create a private, beautiful Wrapped for your partner”
+
+Create CTA: “Start Creating”
+
+Password toggle: “Protect with a password”
+
+Editor title placeholder: “Untitled Wrapped — tap to rename”
+
+Preview CTA: “Preview how they’ll see it”
+
+Create final CTA: “Make it live”
+
+Sharing success: “Your Wrapped is ready! Share this private link.”
+
+Password gate: “This Wrapped is private — enter the password.”
+
+Intro tap prompt: “Tap to begin — turn up your volume for the full effect”
+
+Coupon button (viewer): “Redeem”
+
+Redeem success: “Redeemed 💖 — Enjoy!”

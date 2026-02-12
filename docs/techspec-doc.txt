@@ -1,0 +1,940 @@
+1. Project Setup & Architecture Overview
+What to build
+
+You will build a single-page web application that consists of two major parts:
+
+1) Creator Interface
+
+Where a user (creator) builds a Wrapped:
+
+Landing page
+
+Create Wrapped flow
+
+Editor UI
+
+Preview flow
+
+Sharing screen
+
+2) Partner Viewer Interface
+
+Where the partner opens the shared link:
+
+Optional password screen
+
+Cinematic intro screen
+
+Fullscreen viewer with navigation
+
+How to build it
+
+Your system consists of three logical layers:
+
+A) Frontend (React + Vite + Tailwind + Framer Motion)
+
+Routes: Landing, Create, Editor, Preview, Share, Viewer
+
+Components: Page editor types (Scrapbook, Coupon, Playlist)
+
+UI state management: React hooks + local state + network requests
+
+B) Backend Logic (Supabase Edge Functions)
+
+Stateless server logic
+
+Handles: create wrapped, update pages/content, verify password, fetch wrapped structure, redeem coupons
+
+C) Media Storage (Cloudflare R2 + Worker)
+
+Handles media uploads (images/videos)
+
+Returns public URLs for assets
+
+Stores only URLs in Supabase DB
+
+Why this setup
+
+Frontend: React + Vite = simple component-based UI
+
+CSS: Tailwind = utility-first styling and consistent design system
+
+Animations: Framer Motion = simple, smooth transitions
+
+Supabase: hosted Postgres + functions = lightweight backend
+
+Cloudflare R2: cheap, scalable media storage
+
+2. Database Schema (Conceptual)
+
+You don't need code here, just what tables you’ll have and how they relate.
+
+Table: Wrappeds
+
+This stores one “Wrapped” experience.
+
+Fields:
+
+id (unique)
+
+slug (unguessable public identifier)
+
+owner name
+
+partner name
+
+title
+
+optional password hash
+
+global playlist link
+
+creation + optional expiry timestamps
+
+Table: Pages
+
+Each wrapped consists of one or more pages.
+
+Fields:
+
+id
+
+wrapped id (foreign reference)
+
+page type (scrapbook / coupon / playlist / summary)
+
+order index (which page goes first)
+
+template id (which design to use)
+
+content JSON (text, links, etc.)
+
+Table: Media
+
+Each row stores one piece of media associated with a page.
+
+Fields:
+
+id
+
+wrapped id
+
+page id
+
+URL (public R2 media link)
+
+mime type
+
+key (the object key in R2 for deletion if needed)
+
+Table: Coupon Redemptions
+
+Tracks which coupons have been redeemed by partner.
+
+Fields:
+
+id
+
+wrapped id
+
+page id
+
+coupon index
+
+redeemed at timestamp
+
+3. Backend Responsibilities (Supabase Edge Functions)
+
+You will write several server endpoints. Each endpoint is a single job with clear input and output:
+
+All frontend interactions that change data must go through these functions.
+
+3.1 Create Wrapped
+
+What it does
+
+Takes owner name, partner name, optional password, title
+
+Generates a unique slug
+
+Stores a new Wrapped record
+
+Returns wrapped id + slug
+
+How data flows
+
+Frontend sends a request with wrapped info
+
+Backend hashes password (if provided) and writes to DB
+
+Backend returns slug to frontend
+
+3.2 Save Page
+
+What it does
+
+Inserts or updates a page for a Wrapped
+
+Contains page metadata (type, template) and JSON content
+
+Flow
+
+Frontend sends page JSON
+
+Backend writes to DB (insert or update)
+
+3.3 Get Wrapped for Editor
+
+What it does
+
+Returns full data for a Wrapped (pages + media)
+
+Used to load an existing wrapped in Editor
+
+3.4 Get Wrapped for Viewer
+
+What it does
+
+Checks slug exists
+
+If password protected, you must call verify password first OR return “requires password”
+
+Returns pages + media + wrapped info
+
+3.5 Verify Password
+
+What it does
+
+Accepts slug + plaintext password
+
+Compares with stored hash
+
+Returns success or failure
+
+3.6 Redeem Coupon
+
+What it does
+
+Records that a coupon was redeemed
+
+Returns success
+
+4. Media Storage with Cloudflare R2
+What to build
+
+Instead of letting Supabase store files, you’ll use Cloudflare R2 for all images/videos.
+
+How it works (step-by-step)
+
+User selects an image or video in the editor
+
+Frontend compresses it (optional but recommended)
+
+Frontend sends it to your Cloudflare Worker endpoint
+
+Worker stores it in R2 under a random key
+
+Worker returns the key
+
+Frontend constructs a public URL like https://your-worker-domain/media/{key}
+
+Store that URL in Supabase Media table associated with a page
+
+Why
+
+R2 has better free storage limits
+
+Cheap and fast CDN delivery
+
+Keeps DB only storing references
+
+5. Core UI Screens & Detailed Flow
+
+Each screen below includes:
+
+Purpose
+
+What must be shown
+
+User interactions
+
+What requests it makes
+
+Navigation triggers (where next)
+
+5.1 Landing Page (Home)
+
+Purpose
+
+Sell the idea, reduce anxiety, and get user to start creating
+
+Must show
+
+Headline + short description (what the product is)
+
+Counter: "X Wrappeds created"
+
+Demo preview (read-only)
+
+Primary CTA: “Create your Wrapped”
+
+User interactions
+
+Tap “Create your Wrapped” → go to Create Wrapped page
+
+Tap Demo preview → opens read-only demo viewer
+
+Requests
+
+Fetch count of wrappeds created (optional)
+
+Navigation
+
+Landing → Create Wrapped
+Landing → Demo Viewer (modal or overlay)
+
+5.2 Create Wrapped Page
+
+Purpose
+
+Collect optional password
+
+Collect owner/partner names and title
+
+Fields
+
+Owner name
+
+Partner name
+
+Title
+
+Toggle: “No / Yes” for password protection
+
+If yes: show password + confirm fields
+
+Validations
+
+Password fields only required if toggle ON
+
+Allow skip password
+
+Interaction
+
+Tap “Start Creating”
+
+Requests
+
+Calls Create Wrapped backend endpoint
+
+Backend returns slug
+
+Navigation
+
+Create Wrapped → Editor
+
+5.3 Editor Page (Main Work Area)
+
+This is the central interactive area of the product.
+
+Layout sections
+
+Top bar
+
+Wrapped title (editable)
+
+Save status indicator (auto-save)
+
+Preview button
+
+Create final wrapped button
+
+Main canvas
+
+Renders selected page
+
+Editors change based on page type
+
+Bottom toolbar
+
+Pages list button
+
+Add page button
+
+Customize button
+
+Responsibilities
+
+Load existing wrapped (slug)
+
+Show page data in correct editor
+
+Save changes (auto-save)
+
+Maintain order and page metadata
+
+5.4 Pages Sidebar
+
+Purpose
+
+Show list of pages
+
+Allow reorder, rename, delete, add
+
+Must show
+
+Page icon (Scrapbook, Coupon, Playlist, Summary)
+
+Page title (editable)
+
+Drag handle
+
+Interactions
+
+Drag pages to reorder
+
+Tap to select a page
+
+Swipe or button to delete
+
+Tap Add Page → opens Add Page modal
+
+Navigation
+
+Editor → Add Page Modal
+
+5.5 Add Page Modal
+
+Purpose
+
+Provide choice of page type to add
+
+Must show
+
+Grid/row with:
+
+Scrapbook
+
+Love Coupon
+
+Playlist
+
+Relationship Wrapped Summary
+
+Interaction
+
+Tap type → create page → selects it in editor
+
+5.6 Page Editors (center content)
+
+There are three types:
+
+A) Scrapbook Page Editor
+
+Media gallery (1–n images)
+
+Captions per image
+
+Buttons: upload image, remove, reorder
+
+How to build this
+
+Users select media → drive upload flow to Cloudflare Worker
+
+Render uploaded URLs in gallery
+
+Allow adding text below each image
+
+B) Love Coupon Page Editor
+
+List of coupon cards
+
+Each card: title + description
+
+Add coupon
+
+Delete/reorder
+
+Build it
+
+Simple list UI
+
+Visual design that looks like coupons
+
+C) Playlist Page Editor
+
+Input for Spotify or YouTube link
+
+Text area for custom message
+
+Show small preview block once link is recognized
+
+Build it
+
+Recognize Spotify/YouTube patterns
+
+After paste: show embed preview (just an iframe or embed card)
+
+5.7 Customization Panel
+
+Purpose
+
+Let users change visual style of a page
+
+Let users choose global settings
+
+Things to include
+
+Template selection (predefined designs)
+
+Background color or gradient
+
+Text color
+
+Font style
+
+Animation presets
+
+Global background music link
+
+How to build
+
+Create a bottom sheet UI
+
+Let user tap on a preset visual card → apply style
+
+Store these settings inside the page JSON (or a separate visual config)
+
+5.8 Preview Screen
+
+Purpose
+
+Show full viewer preview exactly how partner would see it
+
+Things to show
+
+Fullscreen view
+
+Navigation controls
+
+Music controls
+
+Build
+
+Render pages with viewer components
+
+Allow exit to go back to editor
+
+5.9 Create / Finalize Wrapped Action
+
+Purpose
+
+End editing session and transition to Sharing Screen
+
+What happens
+
+Validate each page has minimal data
+
+Save all pending edits
+
+Confirm final wrapped ready
+
+5.10 Sharing Screen
+
+Purpose
+
+Give user the link + QR code
+
+Must show
+
+Invite message: “Your Wrapped is ready!”
+
+Shareable link field
+
+Copy button (copies link)
+
+QR code for easy sharing
+
+Optional: “View as partner” button
+
+Navigation
+
+Sharing Screen → Viewer Route
+
+5.11 Viewer Route (Partner Side)
+Optional Password Gate
+
+Display
+
+“This Wrapped is private”
+
+Password input
+
+Unlock button
+
+Flow
+
+If password required, call verify → if success → go to intro
+
+If not required, skip
+
+5.12 Intro Cinematic Screen
+
+Purpose
+
+Play intro animation
+
+Ask partner to tap to begin
+
+Request fullscreen + audio interaction
+
+Must include
+
+Stylized headline, tagged partner’s name
+
+Tap to begin button
+
+Volume recommendation text
+
+After tap
+
+Start audio (background music)
+
+Trigger first page transition
+
+5.13 Viewer Content Screen
+
+Purpose
+
+Show pages with cinematic transitions
+
+Must include
+
+Fullscreen
+
+Music controls
+
+Navigation (Prev/Next)
+
+The butterfly guiding motif
+
+Interactions
+
+Swipe left/right to navigate
+
+Tap controls to pause/play
+
+Buttons animate
+
+Add details by page:
+Scrapbook page viewer
+
+Show image + caption
+
+Fade in / parallax effect as page enters
+
+Butterfly motif floats
+
+Playlist page viewer
+
+Embedded Spotify/YouTube
+
+Text message under embed
+
+Coupon page viewer
+
+Show coupon cards
+
+Redeem button on each
+
+On redeem:
+
+Play micro animation
+
+Mark coupon as redeemed
+
+Store redeemed state
+
+Build coupon redemption
+
+Call backend endpoint with wrapped slug + page id + coupon index
+
+Backend stores redemption in DB
+
+5.14 End Page (Final Emotional Payoff)
+
+Purpose
+
+Close the experience
+
+Show a strong message
+
+CTA to replay or send reaction
+
+Must include
+
+Fullscreen text (creator’s closing note)
+
+Buttons:
+
+Replay experience
+
+Share reaction (optional)
+
+6. Network Request Patterns
+
+Whenever you need to read or write data:
+
+Create
+
+Frontend calls backend “createWrapped”
+
+Backend returns slug
+
+Save Page
+
+Editor calls “savePage” whenever user edits a page
+
+Auto-save every change
+
+Upload Media
+
+Editor requests upload → worker stores → return media URL
+
+Then editor calls savePage with that media URL
+
+Get Wrapped for Editor
+
+Editor on load: fetch wrapped + pages + media
+
+Get Wrapped for Viewer
+
+Viewer on load: fetch wrapped + pages + media
+
+If password required: strip content until verified
+
+Verify Password
+
+Viewer sends slug + password → backend returns access token or wrapped content
+
+Redeem Coupon
+
+Viewer sends redemption request → backend updates DB
+
+7. Frontend Build Steps (concepts)
+
+Here’s how to assemble your frontend from top to bottom:
+
+7.1 Routing
+
+Define paths:
+
+/ → Landing
+
+/create → Create Wrapped
+
+/editor/:slug → Editor
+
+/preview/:slug → Preview
+
+/share/:slug → Sharing
+
+/w/:slug → Viewer
+
+React Router handles navigation.
+
+7.2 Global app layout
+
+Sticky header navigation for editor
+
+Bottom toolbar in editor
+
+Fullscreen viewer for partner side
+
+7.3 State management
+
+Use React Context or a simple state library for:
+
+Current wrapped data
+
+Pages list
+
+Editor UI state
+
+Media state
+
+Auto-save strategy:
+
+Debounce saving so it doesn’t hit backend too often
+
+On every meaningful change (text, media added, reorder), trigger a save after 500ms
+
+7.4 Editor UI Implementation Notes
+Save status indicator
+
+Show small text near header:
+
+“Saving…”
+
+“Saved”
+
+“Offline (local draft)”
+
+Pages list
+
+Use drag-and-drop library to reorder
+Store order index
+
+Customize panel
+
+Use prebuilt theme presets
+Store theme choices in page JSON
+
+7.5 Viewer Implementation Notes
+Fullscreen API
+
+On intro screen after tap, request browser fullscreen
+Fallback gracefully if not supported
+
+7.6 Music Playback
+
+One global audio element in viewer
+Controls:
+
+Play/Pause
+
+Volume
+
+Mute/Unmute
+
+Autoplay only after first tap
+
+7.7 Animations (with Framer Motion)
+
+Define animation patterns:
+
+Page enter/exit
+
+Butterfly motif paths
+
+Text reveal
+
+Button interactions (scale / gentle bounce)
+
+Coupon redemption sparkles
+
+Use CSS variables + theme presets to drive animation parameters.
+
+8. Deployment Steps (how to build & release)
+A) Frontend
+
+Build with Vite
+
+Deploy to Vercel
+
+Set environment variables:
+
+Supabase URL + anon key
+
+Backend API base
+
+Worker base URL
+
+B) Supabase Edge Functions
+
+Deploy createWrapped, savePage, viewerFetch, verifyPassword, redeemCoupon
+
+Set secret env vars in Supabase project
+
+C) Cloudflare Worker
+
+Deploy upload/serve worker
+
+Bind R2 bucket
+
+Configure media domain
+
+9. Final Deliverables Checklist (what you will produce)
+
+For each bullet below, you should build a module:
+
+Frontend
+
+Routing system
+
+Landing page
+
+Create Wrapped form
+
+Editor page
+
+Pages sidebar
+
+Add page modal
+
+Scrapbook editor
+
+Coupon editor
+
+Playlist editor
+
+Customize panel
+
+Preview screen
+
+Share screen
+
+Partner viewer route
+
+Password unlock screen
+
+Intro cinematic screen
+
+Full viewer UI with transitions
+
+Backend
+
+Create Wrapped endpoint
+
+Save Page endpoint
+
+Get Wrapped for Editor
+
+Get Wrapped for Viewer
+
+Verify Password
+
+Redeem Coupon
+
+Storage
+
+Cloudflare Worker for upload + media serving
+
+10. Common Mistakes & How to Avoid Them
+
+Mistake: Saving only on “Save” click → risk losing changes
+Fix: Auto-save on every change with debounce
+
+Mistake: Browser blocks audio
+Fix: Only start audio after user gesture (intro tap)
+
+Mistake: Too many themes → UI overload
+Fix: Offer curated presets only
+
+Mistake: Images too large
+Fix: Always compress before upload
+
+Mistake: Slug can be guessed
+Fix: Use long random slug (e.g., 20+ chars base62)
+
+11. Naming Conventions (suggested)
+
+Use consistent naming for:
+
+Route parameters (slug)
+
+Page types (SCRAPBOOK, COUPON, PLAYLIST, SUMMARY)
+
+Template IDs (e.g., theme_soft, theme_dreamy)
+
+Media keys (wrappeds/{slug}/{uuid}.{ext})
