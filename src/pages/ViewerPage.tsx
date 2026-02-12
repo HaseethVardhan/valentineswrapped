@@ -144,6 +144,39 @@ export function ViewerPage() {
         }, 1000)
     }
 
+    // Keep-alive for mobile audio
+    useEffect(() => {
+        if (!started || !isPlaying || !videoPlayer || typeof videoPlayer.getPlayerState !== 'function') return
+
+        const checkAndPlay = () => {
+            try {
+                const state = videoPlayer.getPlayerState()
+                // If it's paused (2), ended (0), cued (5), or unstarted (-1)
+                // And we want it to be playing
+                if (state !== 1 && state !== 3) {
+                    videoPlayer.playVideo()
+                }
+            } catch (e) {
+                console.error("Error in keep-alive", e)
+            }
+        }
+
+        const interval = setInterval(checkAndPlay, 2000) // Check every 2 seconds
+
+        const handleInteraction = () => {
+            checkAndPlay()
+        }
+
+        window.addEventListener('touchstart', handleInteraction)
+        window.addEventListener('click', handleInteraction)
+
+        return () => {
+            clearInterval(interval)
+            window.removeEventListener('touchstart', handleInteraction)
+            window.removeEventListener('click', handleInteraction)
+        }
+    }, [started, isPlaying, videoPlayer])
+
     // Toggle Play/Pause
     const togglePlay = () => {
         if (!videoPlayer) return
