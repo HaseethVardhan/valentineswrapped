@@ -92,8 +92,8 @@ export interface Wrapped {
     title: string
     ownerName?: string
     partnerName?: string
-    passwordHash?: string
     isPasswordProtected: boolean
+    password?: string // Transient: only used client-side for local drafts before first save
     data: WrappedData
     pages: Page[] // Kept for frontend compatibility, will be mapped from data.pages
     globalTheme?: PageTheme

@@ -99,9 +99,7 @@ export function EditSidebar({
 
                                                     // Show compression info if image was compressed
                                                     if (result.wasCompressed) {
-                                                        const originalMB = (result.originalSize / 1024 / 1024).toFixed(1)
-                                                        const compressedMB = (result.compressedSize / 1024 / 1024).toFixed(1)
-                                                        console.log(`Image compressed: ${originalMB}MB → ${compressedMB}MB`)
+                                                        // Image compressed successfully
                                                     }
 
                                                     // Upload the compressed image
@@ -230,15 +228,16 @@ export function EditSidebar({
                                                             const input = document.createElement('input')
                                                             input.type = 'file'
                                                             input.accept = 'image/*'
-                                                            input.onchange = async (e: any) => {
-                                                                const file = e.target.files?.[0]
+                                                            input.onchange = async (e: Event) => {
+                                                                const file = (e.target as HTMLInputElement).files?.[0]
                                                                 if (file) {
                                                                     try {
-                                                                        const url = await useEditorStore.getState().uploadMedia(file)
+                                                                        const result = await processImage(file)
+                                                                        const url = await useEditorStore.getState().uploadMedia(result.file)
                                                                         const blocks = [...(activePage.content.blocks || [])]
                                                                         blocks[index] = { ...blocks[index], url }
                                                                         updatePage(activePage.id, { content: { ...activePage.content, blocks } })
-                                                                    } catch (err) { alert("Upload failed") }
+                                                                    } catch (err) { alert(err instanceof Error ? err.message : "Upload failed") }
                                                                 }
                                                             }
                                                             input.click()

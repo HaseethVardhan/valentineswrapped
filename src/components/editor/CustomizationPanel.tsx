@@ -46,7 +46,7 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
                                         style={{ backgroundColor: color }}
                                         onClick={() => {
                                             // TODO: Implement theme update logic
-                                            console.log('Set theme color', color)
+                                            // Theme color set
                                         }}
                                     />
                                 ))}

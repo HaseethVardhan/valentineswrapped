@@ -64,18 +64,14 @@ export function EditorPage() {
 
         // If we have data but slugs don't match, reload
         if (wrapped && wrapped.slug !== slug) {
-            console.log("EditorPage: Slugs mismatch, loading new...", slug)
             loadWrapped(slug).catch(() => {
-                console.error("Failed to load wrapped", slug)
                 navigate('/')
             })
         }
 
         // If we have no data, load it
         if (!wrapped) {
-            console.log("EditorPage: No data, loading...", slug)
             loadWrapped(slug).catch(() => {
-                console.error("Failed to load wrapped", slug)
                 navigate('/')
             })
         }
@@ -97,7 +93,6 @@ export function EditorPage() {
     const isSummary = (page: Page): page is SummaryPage => page.type === 'summary'
 
     const handleSave = async () => {
-        console.log("EditorPage: Saving wrapped...", wrapped?.pages?.length)
 
         // Flag that we are handling a save that might change the URL
         isHandlingSave.current = true
@@ -112,8 +107,7 @@ export function EditorPage() {
                 }
                 setShareDialogOpen(true)
             }
-        } catch (error) {
-            console.error("Failed to save:", error)
+        } catch {
             isHandlingSave.current = false
         }
         // Note: isHandlingSave.current is reset in the useEffect once the new slug matches
@@ -122,7 +116,6 @@ export function EditorPage() {
     // Auto-migrate content
     useEffect(() => {
         if (activePage && isScrapbook(activePage) && !activePage.content.blocks) {
-            console.log("Migrating page to blocks...", activePage.id)
             const blocks = migrateScrapbookContent(activePage)
             updatePage(activePage.id, {
                 content: {

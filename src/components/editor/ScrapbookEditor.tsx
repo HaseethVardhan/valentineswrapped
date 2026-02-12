@@ -40,7 +40,7 @@ export function ScrapbookEditor({ page, onUpdate }: ScrapbookEditorProps) {
                 },
             })
         } catch (error) {
-            console.error("Failed to upload image", error)
+            // Failed to upload image
             alert("Failed to upload image")
         } finally {
             // Reset input

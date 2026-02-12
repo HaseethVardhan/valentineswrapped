@@ -60,7 +60,7 @@ export function CreateWrappedPage() {
                 title: `For ${formData.partnerName}`,
                 partnerName: formData.partnerName,
                 isPasswordProtected: formData.isPasswordProtected,
-                passwordHash: formData.password
+                password: formData.password
             })
 
             toast({

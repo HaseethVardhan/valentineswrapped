@@ -9,7 +9,7 @@ interface EditorState {
     isSaving: boolean
 
     drafts: Wrapped[]
-    createWrapped: (options: { title: string, partnerName: string, isPasswordProtected: boolean, passwordHash?: string }) => Promise<string>
+    createWrapped: (options: { title: string, partnerName: string, isPasswordProtected: boolean, password?: string }) => Promise<string>
     loadWrapped: (slug: string) => Promise<void>
     deleteDraft: (slug: string) => void
     updateWrappedTitle: (title: string) => void
@@ -32,7 +32,7 @@ export const useEditorStore = create<EditorState>()(persist((set, get) => ({
     isSaving: false,
     drafts: [],
 
-    createWrapped: async ({ title, partnerName, isPasswordProtected, passwordHash }) => {
+    createWrapped: async ({ title, partnerName, isPasswordProtected, password }) => {
         // Local creation only - no API call yet
         const tempId = `temp-${Date.now()}`
         const tempSlug = `draft-${Date.now()}`
@@ -43,7 +43,7 @@ export const useEditorStore = create<EditorState>()(persist((set, get) => ({
             title,
             partnerName,
             isPasswordProtected,
-            passwordHash,
+            password,
             pages: [],
             createdAt: new Date().toISOString(),
             data: { pages: [] }

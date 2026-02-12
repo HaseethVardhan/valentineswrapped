@@ -49,11 +49,8 @@ export function ViewerPage() {
             const videoId = wrapped.bgMusicUrl?.match(/(?:youtu\.be\/|youtube\.com\/.*v=)([^&?]+)/)?.[1]
             if (!videoId) return
 
-            if (!videoId) return
-
             // Ensure element exists before initializing
             if (!document.getElementById('bg-music-player')) {
-                console.error("Player element not found")
                 return
             }
 
@@ -89,11 +86,11 @@ export function ViewerPage() {
                                 event.target.playVideo()
                             }
                         },
-                        'onError': (e: any) => console.error("YouTube Player Error:", e)
+                        'onError': () => { }
                     }
                 })
-            } catch (error) {
-                console.error("Error creating YouTube player:", error)
+            } catch {
+                // YouTube player creation failed silently
             }
         }
 
@@ -111,7 +108,6 @@ export function ViewerPage() {
 
     useEffect(() => {
         const load = async () => {
-            console.log("ViewerPage: Loading slug:", slug)
             if (!slug) return
 
             // 1. Check if we have a local draft matching this slug (for preview)
@@ -128,8 +124,8 @@ export function ViewerPage() {
                 const data = await api.getWrapped(slug)
                 setWrapped(data)
                 setShowIntro(true)
-            } catch (e) {
-                console.error("Failed to load wrapped", e)
+            } catch {
+                // Failed to load wrapped
             } finally {
                 setLoading(false)
             }
@@ -137,21 +133,35 @@ export function ViewerPage() {
         load()
     }, [slug, localWrapped])
 
-    const handleUnlock = (e: React.FormEvent) => {
+    const handleUnlock = async (e: React.FormEvent) => {
         e.preventDefault()
         setUnlocking(true)
         setError(false)
 
-        // Simple check against stored hash (which is raw password for now)
-        setTimeout(() => {
-            if (wrapped && password === wrapped.passwordHash) {
+        try {
+            // Special case for local drafts (Preview mode)
+            // These don't exist in DB yet, so we verify against the local transient password
+            if (wrapped?.id.startsWith('temp-')) {
+                if (wrapped.password === password) {
+                    setIsAuthenticated(true)
+                } else {
+                    setError(true)
+                }
+                return
+            }
+
+            // For published wrappeds, verify server-side
+            const isValid = await api.verifyPassword(slug!, password)
+            if (isValid) {
                 setIsAuthenticated(true)
-                // Intro is already set to true, so it will show now
             } else {
                 setError(true)
             }
+        } catch {
+            setError(true)
+        } finally {
             setUnlocking(false)
-        }, 1000)
+        }
     }
 
     // Keep-alive for mobile audio
@@ -167,8 +177,8 @@ export function ViewerPage() {
                 if (state !== 1 && state !== 3) {
                     videoPlayer.playVideo()
                 }
-            } catch (e) {
-                console.error("Error in keep-alive", e)
+            } catch {
+                // Error in keep-alive
             }
         }
 
@@ -205,7 +215,7 @@ export function ViewerPage() {
             videoPlayer.unMute()
             videoPlayer.playVideo() // Ensure it's playing in case preload was blocked
         } else {
-            console.warn("Player not ready on start")
+            // Player not ready on start
         }
     }
 

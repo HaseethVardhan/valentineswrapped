@@ -6,21 +6,19 @@ interface Props {
 
 interface State {
     hasError: boolean;
-    error: Error | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
     public state: State = {
         hasError: false,
-        error: null,
     };
 
-    public static getDerivedStateFromError(error: Error): State {
-        return { hasError: true, error };
+    public static getDerivedStateFromError(): State {
+        return { hasError: true };
     }
 
-    public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error("Uncaught error:", error, errorInfo);
+    public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+        // Error is intentionally not logged to the console in production
     }
 
     public render() {
@@ -28,9 +26,9 @@ export class ErrorBoundary extends Component<Props, State> {
             return (
                 <div className="flex flex-col h-screen items-center justify-center bg-background text-foreground p-8 text-center">
                     <h1 className="text-2xl font-bold mb-4 text-destructive">Something went wrong</h1>
-                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-auto max-w-full text-left">
-                        {this.state.error?.message}
-                    </pre>
+                    <p className="text-muted-foreground mb-6">
+                        Something unexpected happened. Please try refreshing the page.
+                    </p>
                     <button
                         onClick={() => window.location.reload()}
                         className="mt-6 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
